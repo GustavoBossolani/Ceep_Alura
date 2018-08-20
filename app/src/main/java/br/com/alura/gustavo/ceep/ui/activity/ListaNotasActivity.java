@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +17,7 @@ import br.com.alura.gustavo.ceep.dao.NotaDAO;
 import br.com.alura.gustavo.ceep.model.Nota;
 import br.com.alura.gustavo.ceep.recycler.adapter.ListaNotasAdapter;
 import br.com.alura.gustavo.ceep.recycler.adapter.listener.OnItemClickListener;
+import br.com.alura.gustavo.ceep.recycler.callback.NotaItemTouchHelperCallback;
 
 import static br.com.alura.gustavo.ceep.ui.activity.interfaces.NotasActivityConstantes.CHAVE_NOTA;
 import static br.com.alura.gustavo.ceep.ui.activity.interfaces.NotasActivityConstantes.CHAVE_POSICAO;
@@ -25,6 +27,7 @@ import static br.com.alura.gustavo.ceep.ui.activity.interfaces.NotasActivityCons
 
 public class ListaNotasActivity extends AppCompatActivity {
 
+    public static final String TITULO_APP_BAR_NOTAS = "Notas";
     private NotaDAO dao;
     private List<Nota> notas;
     private ListaNotasAdapter adapter;
@@ -33,9 +36,11 @@ public class ListaNotasActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setTitle(TITULO_APP_BAR_NOTAS);
+
         setContentView(R.layout.activity_lista_notas);
         dao = new NotaDAO();
-
         notas = buscarTodasNotas();
         configurarRecyclerView(notas);
         configuraBotao();
@@ -58,12 +63,12 @@ public class ListaNotasActivity extends AppCompatActivity {
             Nota nota = (Nota) data.getSerializableExtra(CHAVE_NOTA);
 
             if(ehPosicaoValida(posicao)) {
-                Toast.makeText(this, "Nota alterada.",
+                Toast.makeText(this, "Nota alterada",
                         Toast.LENGTH_SHORT).show();
                 altera(posicao, nota);
             }else{
                 Toast.makeText(this,
-                        "Ocorreu um problema naalteração da nota!", Toast.LENGTH_SHORT).show();
+                        "Ocorreu um problema na alteração da nota!", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -123,6 +128,16 @@ public class ListaNotasActivity extends AppCompatActivity {
     }
     private void configurarRecyclerView(List<Nota> notas) {
         RecyclerView listaNotas = findViewById(R.id.lista_notas_lista);
+        configuraAdapter(notas, listaNotas);
+        configuraItemTouchHelper(listaNotas);
+    }
+
+    private void configuraItemTouchHelper(RecyclerView listaNotas) {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new NotaItemTouchHelperCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(listaNotas);
+    }
+
+    private void configuraAdapter(List<Nota> notas, RecyclerView listaNotas) {
         adapter = new ListaNotasAdapter(this, notas);
         listaNotas.setAdapter(adapter);
 
@@ -145,8 +160,11 @@ public class ListaNotasActivity extends AppCompatActivity {
     }
 
     private List<Nota> buscarTodasNotas() {
-        dao.insere(new Nota("Insira um novo Título Bacana para sua anotação",
-                "E também não se esqueça da descrição!"));
+
+        dao.insere(new Nota("Insira um novo Título para sua anotação",
+                "E também não se esqueça da descrição!"),
+                new Nota("Deslize para os lados para Remover sua Nota","Esqueda ou Direita"),
+                new Nota("Arraste  para Reordenar sua Nota", "Cima ou Baixo"));
         return dao.buscarNotasSalvas();
     }
 }

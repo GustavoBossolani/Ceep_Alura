@@ -20,6 +20,7 @@ import static br.com.alura.gustavo.ceep.ui.activity.interfaces.NotasActivityCons
 public class FormularioNotaActivity extends AppCompatActivity {
 
 
+    public static final String TITULO_APP_BAR_DETALHES = "Detalhes";
     private NotaDAO dao;
     private int posicao = POSICAO_INVALIDA;
     private TextView titulo;
@@ -29,6 +30,8 @@ public class FormularioNotaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario_nota);
+        setTitle(TITULO_APP_BAR_DETALHES);
+
         dao = new NotaDAO();
         inicializarCampos();
 
@@ -39,6 +42,17 @@ public class FormularioNotaActivity extends AppCompatActivity {
             posicao = dadoRecebido.getIntExtra(CHAVE_POSICAO, POSICAO_INVALIDA);
             preencherCampos(notaRecebida);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        retornarNotaCancelada();
+    }
+
+    private void retornarNotaCancelada() {
+        Intent resultadoCancelamento = new Intent();
+        setResult(Activity.RESULT_CANCELED, resultadoCancelamento);
+        finish();
     }
 
     private void preencherCampos(Nota notaRecebida) {
